@@ -14,4 +14,10 @@ public partial class MainWindow : Window
             new EndpointBenchmarkService(new PingProbe(), new DnsUdpProbe()),
             new WindowsDnsManager());
     }
+
+    protected override void OnClosed(EventArgs eventArgs)
+    {
+        (DataContext as IDisposable)?.Dispose();
+        base.OnClosed(eventArgs);
+    }
 }

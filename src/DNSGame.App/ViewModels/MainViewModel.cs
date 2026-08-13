@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
@@ -9,7 +11,7 @@ using DNSGame.Core.Services;
 
 namespace DNSGame.App.ViewModels;
 
-public sealed class MainViewModel : INotifyPropertyChanged
+public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly EndpointBenchmarkService benchmarkService;
     private readonly WindowsDnsManager dnsManager;
@@ -98,6 +100,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         get => progressPercent;
         private set => SetField(ref progressPercent, value);
+    }
+
+    public void Dispose()
+    {
+        cancellation?.Cancel();
+        cancellation?.Dispose();
+        cancellation = null;
     }
 
     private async Task StartBenchmarkAsync()
@@ -252,7 +261,7 @@ public sealed class EndpointRowViewModel(EndpointBenchmark benchmark)
 
     public string DnsResponse { get; } = benchmark.Dns.IsDnsServer ? Format(benchmark.Dns.ResponseMilliseconds, "ms") : "No";
 
-    public string Score { get; } = benchmark.Score?.ToString("0.##") ?? "—";
+    public string Score { get; } = benchmark.Score?.ToString("0.##", CultureInfo.InvariantCulture) ?? "—";
 
     public string Status { get; } = benchmark.Status;
 
