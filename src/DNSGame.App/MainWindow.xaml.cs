@@ -15,9 +15,9 @@ public partial class MainWindow : Window
             new WindowsDnsManager());
     }
 
-    protected override void OnClosed(EventArgs eventArgs)
+    protected override void OnClosed(EventArgs e)
     {
         (DataContext as IDisposable)?.Dispose();
-        base.OnClosed(eventArgs);
+        base.OnClosed(e);
     }
 }

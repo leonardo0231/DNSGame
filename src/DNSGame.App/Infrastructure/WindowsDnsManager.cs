@@ -9,8 +9,14 @@ namespace DNSGame.App.Infrastructure;
 
 public sealed class WindowsDnsManager
 {
-    private static readonly string StateDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DNSGame");
-    private static readonly string SnapshotPath = Path.Combine(StateDirectory, "dns-snapshot.json");
+    private readonly string stateDirectory;
+    private readonly string snapshotPath;
+
+    public WindowsDnsManager(string? stateDirectory = null)
+    {
+        this.stateDirectory = stateDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DNSGame");
+        snapshotPath = Path.Combine(this.stateDirectory, "dns-snapshot.json");
+    }
 
     public async Task ApplyAsync(AdapterInfo adapter, IReadOnlyList<IPAddress> servers, CancellationToken cancellationToken)
     {
@@ -21,15 +27,15 @@ public sealed class WindowsDnsManager
             throw new ArgumentException("At least one IPv4 DNS server is required.", nameof(servers));
         }
 
-        Directory.CreateDirectory(StateDirectory);
-        if (!File.Exists(SnapshotPath))
+        Directory.CreateDirectory(stateDirectory);
+        if (!File.Exists(snapshotPath))
         {
             var currentJson = await RunPowerShellAsync(
                 $"Get-DnsClientServerAddress -InterfaceIndex {adapter.InterfaceIndex} -AddressFamily IPv4 | Select-Object InterfaceIndex,ServerAddresses | ConvertTo-Json -Compress",
                 cancellationToken);
             var current = JsonSerializer.Deserialize<PowerShellDnsState>(currentJson) ?? new PowerShellDnsState(adapter.InterfaceIndex, []);
             var snapshot = new DnsSnapshot(adapter.InterfaceIndex, adapter.Name, current.ServerAddresses ?? []);
-            await File.WriteAllTextAsync(SnapshotPath, JsonSerializer.Serialize(snapshot), cancellationToken);
+            await File.WriteAllTextAsync(snapshotPath, JsonSerializer.Serialize(snapshot), cancellationToken);
         }
 
         var addresses = string.Join(',', servers.Select(address => $"'{address}'"));
@@ -41,7 +47,7 @@ public sealed class WindowsDnsManager
     public async Task RestoreAsync(AdapterInfo adapter, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(adapter);
-        if (!File.Exists(SnapshotPath))
+        if (!File.Exists(snapshotPath))
         {
             await RunPowerShellAsync(
                 $"$ErrorActionPreference='Stop'; Set-DnsClientServerAddress -InterfaceIndex {adapter.InterfaceIndex} -ResetServerAddresses; Clear-DnsClientCache",
@@ -49,7 +55,7 @@ public sealed class WindowsDnsManager
             return;
         }
 
-        var json = await File.ReadAllTextAsync(SnapshotPath, cancellationToken);
+        var json = await File.ReadAllTextAsync(snapshotPath, cancellationToken);
         var snapshot = JsonSerializer.Deserialize<DnsSnapshot>(json) ?? throw new InvalidDataException("The DNS snapshot is invalid.");
         if (snapshot.InterfaceIndex != adapter.InterfaceIndex)
         {
@@ -61,7 +67,7 @@ public sealed class WindowsDnsManager
             : $"Set-DnsClientServerAddress -InterfaceIndex {adapter.InterfaceIndex} -ServerAddresses @({string.Join(',', snapshot.ServerAddresses.Select(address => $"'{IPAddress.Parse(address)}'"))})";
 
         await RunPowerShellAsync($"$ErrorActionPreference='Stop'; {command}; Clear-DnsClientCache", cancellationToken);
-        File.Delete(SnapshotPath);
+        File.Delete(snapshotPath);
     }
 
     private static async Task<string> RunPowerShellAsync(string script, CancellationToken cancellationToken)
