@@ -1,0 +1,67 @@
+name: Windows CI and Installer
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  quality-build-package:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore DNSGame.sln
+
+      - name: Format check
+        run: dotnet format DNSGame.sln --verify-no-changes --no-restore
+
+      - name: Unit tests
+        run: dotnet test DNSGame.sln --configuration Release --no-restore --collect:"XPlat Code Coverage" --logger "trx;LogFileName=tests.trx"
+
+      - name: Publish self-contained application
+        run: dotnet publish src/DNSGame.App/DNSGame.App.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/publish -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress --yes
+
+      - name: Build installer
+        shell: pwsh
+        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" ".ci\installer.iss"'
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResults/**'
+          if-no-files-found: ignore
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: DNSGame-Windows-x64-Installer
+          path: artifacts/installer/DNSGame-Setup-x64.exe
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/installer/DNSGame-Setup-x64.exe
+          generate_release_notes: true

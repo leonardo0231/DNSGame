@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSGame.Core", "src\DNSGame.Core\DNSGame.Core.csproj", "{D7BEA6B9-A713-4D83-8E55-D1E2236E2B60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSGame.App", "src\DNSGame.App\DNSGame.App.csproj", "{A5BA7A2D-589B-4481-989C-90BB9BD8AA03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSGame.Core.Tests", "tests\DNSGame.Core.Tests\DNSGame.Core.Tests.csproj", "{DE6234FD-D4CE-4F82-9BAE-5E54D3EC5BDF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D7BEA6B9-A713-4D83-8E55-D1E2236E2B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7BEA6B9-A713-4D83-8E55-D1E2236E2B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7BEA6B9-A713-4D83-8E55-D1E2236E2B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7BEA6B9-A713-4D83-8E55-D1E2236E2B60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5BA7A2D-589B-4481-989C-90BB9BD8AA03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5BA7A2D-589B-4481-989C-90BB9BD8AA03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5BA7A2D-589B-4481-989C-90BB9BD8AA03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5BA7A2D-589B-4481-989C-90BB9BD8AA03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE6234FD-D4CE-4F82-9BAE-5E54D3EC5BDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE6234FD-D4CE-4F82-9BAE-5E54D3EC5BDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE6234FD-D4CE-4F82-9BAE-5E54D3EC5BDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE6234FD-D4CE-4F82-9BAE-5E54D3EC5BDF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
