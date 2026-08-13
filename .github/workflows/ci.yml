@@ -46,14 +46,14 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: '**/TestResults/**'
           if-no-files-found: ignore
 
       - name: Upload installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: DNSGame-Windows-x64-Installer
           path: artifacts/installer/DNSGame-Setup-x64.exe
